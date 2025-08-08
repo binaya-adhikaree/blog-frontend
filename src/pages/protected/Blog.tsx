@@ -29,7 +29,9 @@ const Blog = () => {
       return (
         blog.title.toLowerCase().includes(searchTerm) ||
         blog.content.toLowerCase().includes(searchTerm) ||
-        `${blog.author?.firstName || ""} ${blog.author?.lastName || ""}`.toLowerCase().includes(searchTerm)
+        `${blog.author?.firstName || ""} ${blog.author?.lastName || ""}`
+          .toLowerCase()
+          .includes(searchTerm)
       );
     });
 
@@ -98,7 +100,7 @@ const Blog = () => {
       const res = await fetch("http://localhost:3001/blog/all");
       const data = await res.json();
       setBlogs(data);
-      setFilteredBlogs(data); // Initialize filtered blogs
+      setFilteredBlogs(data);
     } catch (error) {
       console.error("Error fetching blogs");
     }
@@ -108,7 +110,6 @@ const Blog = () => {
     fetchBlogs();
   }, []);
 
-  // Update filtered blogs when blogs change
   useEffect(() => {
     filterBlogs(searchQuery);
   }, [blogs]);
@@ -156,17 +157,17 @@ const Blog = () => {
                 Discover amazing stories and insights
               </p>
             </div>
-            
-            {/* Enhanced Search Input */}
+
             <div className="relative flex items-center">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  className="border border-purple-200 pl-10 pr-10 py-3 rounded-lg min-w-[300px] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-3 rounded-full shadow-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
                   placeholder="Search blogs by title, content, or author..."
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
+
                 {searchQuery && (
                   <button
                     onClick={clearSearch}
@@ -191,14 +192,16 @@ const Blog = () => {
             </button>
           </div>
 
-          {/* Search Results Info */}
           {searchQuery && (
             <div className="mt-4 text-sm text-gray-600">
               {filteredBlogs.length === 0 ? (
-                <span className="text-red-500">No blogs found for "{searchQuery}"</span>
+                <span className="text-red-500">
+                  No blogs found for "{searchQuery}"
+                </span>
               ) : (
                 <span>
-                  Found {filteredBlogs.length} blog{filteredBlogs.length !== 1 ? 's' : ''} for "{searchQuery}"
+                  Found {filteredBlogs.length} blog
+                  {filteredBlogs.length !== 1 ? "s" : ""} for "{searchQuery}"
                 </span>
               )}
             </div>
@@ -421,10 +424,9 @@ const Blog = () => {
                 {searchQuery ? "No matching stories found" : "No stories yet"}
               </h3>
               <p className="text-gray-500 text-center max-w-md">
-                {searchQuery ? 
-                  `Try adjusting your search terms or clear the search to see all stories.` :
-                  `Start sharing your thoughts and experiences with the world. Click "New Story" to get started!`
-                }
+                {searchQuery
+                  ? `Try adjusting your search terms or clear the search to see all stories.`
+                  : `Start sharing your thoughts and experiences with the world. Click "New Story" to get started!`}
               </p>
               {searchQuery && (
                 <button

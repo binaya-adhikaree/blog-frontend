@@ -6,6 +6,7 @@ import Layout from "./pages/Layout";
 import Blog from "./pages/protected/Blog";
 import Home from "./pages/protected/Home";
 import BlogDetails from "./pages/protected/BlogDetails";
+import FavouriteBlogs from "./pages/protected/FavouriteBlogs";
 
 const App = () => {
   return (
@@ -33,6 +34,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/favourite"
+          element={
+            <ProtectedRoute>
+              <FavouriteBlogs />
             </ProtectedRoute>
           }
         />
