@@ -54,7 +54,7 @@ const AuthorProfile: React.FC = () => {
   const API_URL =
     import.meta.env?.VITE_API_URL ||
     (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
-    "https://blog-backend-ae8e.onrender.com/";
+    "https://blog-backend-ae8e.onrender.com";
 
   useEffect(() => {
     const fetchAuthorProfile = async (): Promise<void> => {
