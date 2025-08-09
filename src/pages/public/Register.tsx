@@ -19,10 +19,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const API_URL =
-    import.meta.env?.VITE_API_URL ||
-    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
-    "https://blog-backend-ae8e.onrender.com";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

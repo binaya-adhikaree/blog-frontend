@@ -40,10 +40,8 @@ const CommentForm: React.FC<CommentFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const API_URL =
-    import.meta.env?.VITE_API_URL ||
-    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
-    "https://blog-backend-ae8e.onrender.com";
+  const API_URL = import.meta.env.VITE_API_URL;
+ 
 
   const token = localStorage.getItem("token");
 

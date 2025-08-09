@@ -49,10 +49,8 @@ const FavouriteBlogs: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const navigate = useNavigate();
 
-  const API_URL =
-    import.meta.env?.VITE_API_URL ||
-    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
-    "https://blog-backend-ae8e.onrender.com";
+  const API_URL = import.meta.env.VITE_API_URL;
+ 
 
   const token = localStorage.getItem("token");
 
