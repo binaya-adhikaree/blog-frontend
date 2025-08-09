@@ -8,6 +8,11 @@ import React, {
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../components/AuthContext";
 
+const API_URL =
+  import.meta.env?.VITE_API_URL ||
+  (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+  "http://localhost:3001";
+
 interface User {
   firstName: string;
   lastName: string;
@@ -65,7 +70,7 @@ const Navbar: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/api/user", {
+      const res = await fetch(`${API_URL}/api/user`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

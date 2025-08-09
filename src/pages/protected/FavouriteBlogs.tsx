@@ -49,6 +49,11 @@ const FavouriteBlogs: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const navigate = useNavigate();
 
+  const API_URL =
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+    "http://localhost:3001";
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -63,7 +68,7 @@ const FavouriteBlogs: React.FC = () => {
         setLoading(true);
         setError("");
 
-        const response = await fetch("http://localhost:3001/blog/favourites", {
+        const response = await fetch(`${API_URL}/blog/favourites`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -329,7 +334,7 @@ const FavouriteBlogs: React.FC = () => {
                 {blog.image && (
                   <div className="aspect-video overflow-hidden relative">
                     <img
-                      src={`http://localhost:3001/uploads/${blog.image}`}
+                      src={`${API_URL}/uploads/${blog.image}`}
                       alt={blog.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

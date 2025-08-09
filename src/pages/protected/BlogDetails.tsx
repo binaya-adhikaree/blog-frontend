@@ -70,21 +70,23 @@ const BlogDetails: React.FC = () => {
   const token = localStorage.getItem("token");
   const blogId = id;
 
+  const API_URL =
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+    "http://localhost:3001";
+
   const handleLove = async () => {
     if (!token || !blog?._id || isLoveLoading) return;
 
     setIsLoveLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:3001/blog/react/${blog._id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/blog/react/${blog._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (!response.ok) throw new Error("Failed to toggle love");
 
@@ -104,17 +106,14 @@ const BlogDetails: React.FC = () => {
     setIsFavoriteLoading(true);
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/blog/favourite/${blogId}`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await fetch(`${API_URL}/blog/favourite/${blogId}`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await res.json();
 
@@ -146,7 +145,7 @@ const BlogDetails: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/blog/${id}`, {
+      const res = await fetch(`${API_URL}/blog/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -173,22 +172,19 @@ const BlogDetails: React.FC = () => {
 
   const updateBlog = async (blogId: string) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/blog/update/${blogId}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            title,
-            content,
-            image: editingBlog?.image ?? null,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/blog/update/${blogId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          image: editingBlog?.image ?? null,
+        }),
+      });
 
       const data = await response.json();
 
@@ -206,15 +202,12 @@ const BlogDetails: React.FC = () => {
 
     const fetchComments = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3001/api/comments/${blogId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const res = await fetch(`${API_URL}/api/comments/${blogId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         const data = await res.json();
 
@@ -245,15 +238,12 @@ const BlogDetails: React.FC = () => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/comments/${commentId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/api/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -273,7 +263,7 @@ const BlogDetails: React.FC = () => {
   const handleCommentLike = async (commentId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/comments/like/${commentId}`,
+        `${API_URL}/api/comments/like/${commentId}`,
         {
           method: "POST",
           headers: {
@@ -308,7 +298,7 @@ const BlogDetails: React.FC = () => {
       if (!id) return;
 
       try {
-        const res = await fetch(`http://localhost:3001/blog/${id}`);
+        const res = await fetch(`${API_URL}/blog/${id}`);
         if (!res.ok) throw new Error("Blog not found");
 
         const data = await res.json();
@@ -347,7 +337,7 @@ const BlogDetails: React.FC = () => {
         <article className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-3xl overflow-hidden">
           {blog?.image && (
             <img
-              src={`http://localhost:3001/uploads/${blog.image}`}
+              src={`${API_URL}/uploads/${blog.image}`}
               alt={blog.title}
               className="w-full h-80 object-cover"
             />
@@ -428,10 +418,10 @@ const BlogDetails: React.FC = () => {
             </div>
 
             <div className="text-lg text-gray-700 whitespace-pre-line mb-8">
-              {blog?.content.length > 500 && !showFullContent
+              {blog?.content && blog.content.length > 500 && !showFullContent
                 ? `${blog.content.slice(0, 500)}...`
                 : blog?.content}
-              {blog?.content.length > 500 && (
+              {blog?.content && blog.content.length > 500 && (
                 <button
                   onClick={() => setShowFullContent(!showFullContent)}
                   className="ml-2 text-blue-600 hover:underline text-sm"

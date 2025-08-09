@@ -51,6 +51,10 @@ const AuthorProfile: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const API_URL = import.meta.env?.VITE_API_URL || 
+                  (typeof process !== 'undefined' ? process.env?.REACT_APP_API_URL : null) || 
+                  'http://localhost:3001';
+
   useEffect(() => {
     const fetchAuthorProfile = async (): Promise<void> => {
       if (!id) {
@@ -64,8 +68,7 @@ const AuthorProfile: React.FC = () => {
         setError(null);
 
         const cleanId = id.replace(/}$/, "");
-
-        const res = await fetch(`http://localhost:3001/api/user/${cleanId}`);
+        const res = await fetch(`${API_URL}/api/user/${cleanId}`);
 
         if (!res.ok) {
           if (res.status === 404) {
@@ -100,7 +103,7 @@ const AuthorProfile: React.FC = () => {
     };
 
     fetchAuthorProfile();
-  }, [id]);
+  }, [id, API_URL]);
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -353,7 +356,7 @@ const AuthorProfile: React.FC = () => {
                     {blog.image && (
                       <div className="aspect-video overflow-hidden">
                         <img
-                          src={`http://localhost:3001/uploads/${blog.image}`}
+                          src={`${API_URL}/uploads/${blog.image}`}
                           alt={blog.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

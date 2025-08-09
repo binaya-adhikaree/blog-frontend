@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { Send, Loader } from 'lucide-react';
+import React, { useState } from "react";
+import { Send, Loader } from "lucide-react";
 
 interface CommentType {
   _id: string;
   blogId: string;
-  userId: { _id: string; username: string; firstName?: string; lastName?: string };
+  userId: {
+    _id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  };
   content: string;
   parentCommentId: string | null;
   likes: string[];
@@ -29,69 +34,73 @@ const CommentForm: React.FC<CommentFormProps> = ({
   parentCommentId = null,
   placeholder = "Write your comment...",
   buttonText = "Post Comment",
-  onCancel
+  onCancel,
 }) => {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const token = localStorage.getItem('token');
+  const API_URL =
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+    "http://localhost:3001";
+
+  const token = localStorage.getItem("token");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!content.trim()) {
-      setError('Comment cannot be empty');
+      setError("Comment cannot be empty");
       return;
     }
 
     if (!token) {
-      setError('Please login to comment');
+      setError("Please login to comment");
       return;
     }
 
     if (!blogId) {
-      setError('Blog ID is required');
+      setError("Blog ID is required");
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch(`http://localhost:3001/api/comments/${blogId}`, {
-        method: 'POST',
+      const response = await fetch(`${API_URL}/api/comments/${blogId}`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           content: content.trim(),
-          parentCommentId
+          parentCommentId,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to post comment');
+        throw new Error(data.message || "Failed to post comment");
       }
 
       if (data.success) {
         onCommentAdded(data.data);
-        
-        setContent('');
-        
+
+        setContent("");
+
         if (onCancel) {
           onCancel();
         }
       } else {
-        throw new Error(data.message || 'Failed to post comment');
+        throw new Error(data.message || "Failed to post comment");
       }
-
     } catch (err: any) {
-      console.error('Comment submission error:', err);
-      setError(err.message || 'Failed to post comment');
+      console.error("Comment submission error:", err);
+      setError(err.message || "Failed to post comment");
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +113,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
           {error}
         </div>
       )}
-      
+
       <div>
         <textarea
           value={content}
@@ -119,7 +128,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
           {content.length}/1000 characters
         </div>
       </div>
-      
+
       <div className="flex justify-between items-center">
         <div className="flex gap-2">
           <button
@@ -139,7 +148,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
               </>
             )}
           </button>
-          
+
           {onCancel && (
             <button
               type="button"
@@ -151,11 +160,9 @@ const CommentForm: React.FC<CommentFormProps> = ({
             </button>
           )}
         </div>
-        
+
         {parentCommentId && (
-          <span className="text-sm text-gray-500">
-            Replying to comment
-          </span>
+          <span className="text-sm text-gray-500">Replying to comment</span>
         )}
       </div>
     </form>

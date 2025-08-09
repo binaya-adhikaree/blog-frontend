@@ -47,6 +47,12 @@ interface ProfileUpdateData {
   bio: string;
 }
 
+interface UpdateProfileResponse {
+  success: boolean;
+  user: UserType;
+  message?: string;
+}
+
 const MyProfile: React.FC = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const [blogs, setBlogs] = useState<BlogType[]>([]);
@@ -64,6 +70,11 @@ const MyProfile: React.FC = () => {
     bio: "",
   });
 
+  const API_URL =
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+    "http://localhost:3001";
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
@@ -78,7 +89,7 @@ const MyProfile: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch("http://localhost:3001/api/user", {
+        const res = await fetch(`${API_URL}/api/user`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -116,12 +127,12 @@ const MyProfile: React.FC = () => {
 
   const updateProfile = async (
     profileData: ProfileUpdateData
-  ): Promise<void> => {
+  ): Promise<UpdateProfileResponse> => {
     if (!token) {
       throw new Error("Authentication token not found");
     }
 
-    const response = await fetch("http://localhost:3001/api/user/profile", {
+    const response = await fetch(`${API_URL}/api/user/profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -415,7 +426,7 @@ const MyProfile: React.FC = () => {
                     {blog.image && (
                       <div className="aspect-video overflow-hidden">
                         <img
-                          src={`http://localhost:3001/uploads/${blog.image}`}
+                          src={`${API_URL}/uploads/${blog.image}`}
                           alt={blog.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

@@ -49,7 +49,7 @@ const ReplyComponent: React.FC<ReplyProps> = ({
   const getMarginLeft = () => {
     const maxLevel = 3;
     const currentLevel = Math.min(level, maxLevel);
-    return currentLevel * 20; // 20px per level
+    return currentLevel * 20;
   };
 
   return (
