@@ -11,7 +11,7 @@ import { AuthContext } from "../../components/AuthContext";
 const API_URL =
   import.meta.env?.VITE_API_URL ||
   (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
-  "http://localhost:3001";
+  "https://blog-backend-ae8e.onrender.com/";
 
 interface User {
   firstName: string;
