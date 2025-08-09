@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, X, Plus, Calendar, User, Eye, Menu } from "lucide-react";
+import { ArrowLeft, Search, X, Plus, Calendar, User, Eye } from "lucide-react";
 
 interface Author {
   firstName?: string;
