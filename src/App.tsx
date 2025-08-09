@@ -4,14 +4,33 @@ import Register from "./pages/public/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./pages/Layout";
 import Blog from "./pages/protected/Blog";
-import Home from "./pages/protected/Home";
 import BlogDetails from "./pages/protected/BlogDetails";
 import FavouriteBlogs from "./pages/protected/FavouriteBlogs";
+import UserProfile from "./pages/protected/UserProfile";
+import AuthorProfile from "./pages/protected/AuthorProfilte";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/profile/:id"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/author/:id"
+          element={
+            <ProtectedRoute>
+              <AuthorProfile />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/"
           element={
@@ -29,14 +48,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
 
         <Route
           path="/favourite"
@@ -46,7 +57,15 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/blog/:id" element={<BlogDetails />} />
+
+        <Route
+          path="/blog/:id"
+          element={
+            <ProtectedRoute>
+              <BlogDetails />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

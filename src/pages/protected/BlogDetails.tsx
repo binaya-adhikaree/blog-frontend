@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import CommentForm from "./CommentForm";
 import {
   ArrowLeft,
   Heart,
@@ -29,6 +30,24 @@ interface Blog {
   lovedBy: string[];
 }
 
+interface CommentType {
+  _id: string;
+  blogId: string;
+  userId: {
+    _id: string;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+  };
+  content: string;
+  parentCommentId: string | null;
+  likes: string[];
+  createdAt: string;
+  updatedAt: string;
+  isEdited?: boolean;
+  editedAt?: string;
+}
+
 const BlogDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -45,9 +64,11 @@ const BlogDetails: React.FC = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [showFullContent, setShowFullContent] = useState(false);
+  const [comments, setComments] = useState<CommentType[]>([]);
 
   const currentUserId = localStorage.getItem("userId") || "";
   const token = localStorage.getItem("token");
+  const blogId = id;
 
   const handleLove = async () => {
     if (!token || !blog?._id || isLoveLoading) return;
@@ -181,6 +202,108 @@ const BlogDetails: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!blogId) return;
+
+    const fetchComments = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/comments/${blogId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || `Error ${res.status}`);
+        }
+
+        if (data.success) {
+          setComments(data.data);
+        } else {
+          throw new Error(data.message || "Failed to fetch comments");
+        }
+      } catch (error) {
+        console.error("Failed to load comments:", error);
+      }
+    };
+
+    fetchComments();
+  }, [blogId]);
+
+  const handleCommentAdded = (newComment: CommentType) => {
+    setComments((prev) => [newComment, ...prev]);
+  };
+
+  const handleCommentDelete = async (commentId: string) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setComments((prev) =>
+          prev.filter((comment) => comment._id !== commentId)
+        );
+      } else {
+        alert(data.message || "Failed to delete comment");
+      }
+    } catch (error) {
+      console.error("Delete comment error:", error);
+      alert("Failed to delete comment");
+    }
+  };
+
+  const handleCommentLike = async (commentId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/comments/like/${commentId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setComments((prev) =>
+          prev.map((comment) =>
+            comment._id === commentId
+              ? {
+                  ...comment,
+                  likes: data.data.isLiked
+                    ? [...comment.likes, currentUserId]
+                    : comment.likes.filter((id) => id !== currentUserId),
+                }
+              : comment
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Like comment error:", error);
+    }
+  };
+
+  useEffect(() => {
     const fetchBlog = async () => {
       if (!id) return;
 
@@ -191,7 +314,8 @@ const BlogDetails: React.FC = () => {
         const data = await res.json();
         setBlog(data.blog);
 
-        const favoritesArray = data.blog.favourites || data.blog.favouritedBy || [];
+        const favoritesArray =
+          data.blog.favourites || data.blog.favouritedBy || [];
         setIsFavorite(favoritesArray.includes(currentUserId));
         setIsLoved(data.blog.lovedBy?.includes(currentUserId) || false);
         setLoveCount(data.blog.reactions?.love || 0);
@@ -206,7 +330,8 @@ const BlogDetails: React.FC = () => {
   }, [id, currentUserId]);
 
   if (loading) return <div className="text-center py-20">Loading blog...</div>;
-  if (error) return <div className="text-center text-red-600 py-20">{error}</div>;
+  if (error)
+    return <div className="text-center text-red-600 py-20">{error}</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -236,9 +361,11 @@ const BlogDetails: React.FC = () => {
             <div className="flex flex-wrap items-center gap-4 mb-6">
               <div className="flex items-center gap-2 text-gray-600">
                 <User size={18} />
-                <span>
-                  {blog?.author.firstName} {blog?.author.lastName}
-                </span>
+                <Link to={`/author/${blog?.author._id}}`}>
+                  <span>
+                    {blog?.author.firstName} {blog?.author.lastName}
+                  </span>
+                </Link>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Calendar size={18} />
@@ -248,7 +375,6 @@ const BlogDetails: React.FC = () => {
               </div>
             </div>
 
-            {/* INTERACTION BUTTONS BELOW TITLE */}
             <div className="flex flex-wrap items-center gap-4 mb-8 border-b pb-6">
               <button
                 onClick={handleLove}
@@ -277,10 +403,7 @@ const BlogDetails: React.FC = () => {
                     : "bg-white text-gray-700 border border-gray-300"
                 }`}
               >
-                <Star
-                  size={20}
-                  fill={isFavorite ? "currentColor" : "none"}
-                />
+                <Star size={20} fill={isFavorite ? "currentColor" : "none"} />
                 <span>{isFavorite ? "Favorited" : "Add Favorite"}</span>
               </button>
 
@@ -304,8 +427,7 @@ const BlogDetails: React.FC = () => {
               )}
             </div>
 
-            {/* READ MORE FEATURE */}
-            <div className="text-lg text-gray-700 whitespace-pre-line">
+            <div className="text-lg text-gray-700 whitespace-pre-line mb-8">
               {blog?.content.length > 500 && !showFullContent
                 ? `${blog.content.slice(0, 500)}...`
                 : blog?.content}
@@ -317,6 +439,108 @@ const BlogDetails: React.FC = () => {
                   {showFullContent ? "Read Less" : "Read More"}
                 </button>
               )}
+            </div>
+
+            <div className="mt-8 border-t pt-8">
+              <h2 className="text-2xl font-bold mb-6">
+                Comments ({comments.length})
+              </h2>
+
+              {token ? (
+                <div className="mb-6">
+                  <CommentForm
+                    blogId={blogId}
+                    onCommentAdded={handleCommentAdded}
+                  />
+                </div>
+              ) : (
+                <div className="mb-6 p-4 bg-gray-50 rounded-md text-center">
+                  <p className="text-gray-600">Please login to add a comment</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {comments.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">
+                    No comments yet. Be the first to comment!
+                  </p>
+                ) : (
+                  comments.map((comment) => (
+                    <div
+                      key={comment._id}
+                      className="bg-white border rounded-lg p-4 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            {(comment.userId?.username ||
+                              comment.userId?.firstName ||
+                              "U")[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">
+                              {comment.userId?.firstName &&
+                              comment.userId?.lastName
+                                ? `${comment.userId.firstName} ${comment.userId.lastName}`
+                                : comment.userId?.username || "Anonymous"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(comment.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                              {comment.isEdited && (
+                                <span className="ml-2">(edited)</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        {comment.userId?._id === currentUserId && (
+                          <button
+                            onClick={() => handleCommentDelete(comment._id)}
+                            className="text-red-500 hover:text-red-700 text-sm"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+
+                      <p className="text-gray-800 mb-3 whitespace-pre-wrap">
+                        {comment.content}
+                      </p>
+
+                      <div className="flex items-center gap-4 text-sm">
+                        <button
+                          onClick={() => handleCommentLike(comment._id)}
+                          className={`flex items-center gap-1 ${
+                            comment.likes?.includes(currentUserId)
+                              ? "text-blue-600"
+                              : "text-gray-500 hover:text-blue-600"
+                          }`}
+                          disabled={!token}
+                        >
+                          <Heart
+                            size={16}
+                            fill={
+                              comment.likes?.includes(currentUserId)
+                                ? "currentColor"
+                                : "none"
+                            }
+                          />
+                          {comment.likes?.length || 0}
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
             {editingBlog && (

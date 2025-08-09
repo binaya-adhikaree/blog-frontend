@@ -54,7 +54,6 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Welcome Back
@@ -62,7 +61,6 @@ const Login = () => {
           <p className="text-gray-600">Sign in to your account</p>
         </div>
 
-        {/* Form Container */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
 
@@ -163,7 +161,21 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Footer Links */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 shadow-sm mt-3">
+            <h2 className="text-lg font-semibold text-yellow-800 mb-2">
+              Guest Account
+            </h2>
+            <p className="text-sm text-gray-700">
+              Email:{" "}
+              <span className="font-mono text-gray-900">test@gmail.com</span>
+            </p>
+            <p className="text-sm text-gray-700">
+              Password: <span className="font-mono text-gray-900">test123</span>
+            </p>
+            <p className="mt-2 text-xs text-gray-500">
+              Use this account to explore the platform without signing up.
+            </p>
+          </div>
           <div className="mt-6 text-center">
             <a
               href="#"
@@ -175,7 +187,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Sign Up Link */}
         <div className="text-center mt-6">
           <p className="text-gray-600">
             Don't have an account?{" "}
@@ -189,59 +200,12 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Decorative Elements */}
         <div className="absolute top-10 left-10 w-20 h-20 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div className="absolute top-16 right-10 w-20 h-20 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-20 h-20 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <style jsx>{`
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          10%,
-          30%,
-          50%,
-          70%,
-          90% {
-            transform: translateX(-2px);
-          }
-          20%,
-          40%,
-          60%,
-          80% {
-            transform: translateX(2px);
-          }
-        }
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
-        }
-      `}</style>
+     
     </div>
   );
 };

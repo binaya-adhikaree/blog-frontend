@@ -1,24 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, Search, X, Plus, Calendar, User, Eye } from "lucide-react";
 
-const Blog = () => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
-  const [message, setMessage] = useState("");
-  const [formOpen, setFormOpen] = useState(false);
-  const [blogs, setBlogs] = useState([]);
-  const [filteredBlogs, setFilteredBlogs] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+interface Author {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}
+
+interface Blog {
+  _id: string;
+  title: string;
+  content: string;
+  image?: string;
+  author?: Author;
+  createdAt: string;
+}
+
+const Blog: React.FC = () => {
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [image, setImage] = useState<File | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [formOpen, setFormOpen] = useState<boolean>(false);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [dragActive, setDragActive] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  
   const navigate = useNavigate();
-  const [dragActive, setDragActive] = useState(false);
 
-  // Search state
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Filter blogs based on search query
-  const filterBlogs = (query) => {
+  const filterBlogs = (query: string): void => {
     if (!query.trim()) {
       setFilteredBlogs(blogs);
       return;
@@ -38,19 +51,18 @@ const Blog = () => {
     setFilteredBlogs(filtered);
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const query = e.target.value;
     setSearchQuery(query);
     filterBlogs(query);
   };
 
-  // Clear search
-  const clearSearch = () => {
+  const clearSearch = (): void => {
     setSearchQuery("");
     setFilteredBlogs(blogs);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -77,7 +89,7 @@ const Blog = () => {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ Blog created successfully");
+        setMessage("✅ Article published successfully");
         setTitle("");
         setContent("");
         setImage(null);
@@ -85,7 +97,7 @@ const Blog = () => {
         fetchBlogs();
         setTimeout(() => setMessage(""), 3000);
       } else {
-        setMessage(data.message || "❌ Failed to create blog");
+        setMessage(data.message || "❌ Failed to publish article");
       }
     } catch (error) {
       console.error(error);
@@ -95,7 +107,7 @@ const Blog = () => {
     }
   };
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (): Promise<void> => {
     try {
       const res = await fetch("http://localhost:3001/blog/all");
       const data = await res.json();
@@ -114,7 +126,7 @@ const Blog = () => {
     filterBlogs(searchQuery);
   }, [blogs]);
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: React.DragEvent): void => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -124,7 +136,7 @@ const Blog = () => {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent): void => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -137,37 +149,56 @@ const Blog = () => {
     }
   };
 
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const getAuthorName = (author?: Author): string => {
+    if (!author) return "Anonymous";
+    if (author.firstName && author.lastName) {
+      return `${author.firstName} ${author.lastName}`;
+    }
+    return author.firstName || author.email || "Anonymous";
+  };
+
+  const getReadingTime = (content: string): string => {
+    const wordsPerMinute = 200;
+    const wordCount = content.split(/\s+/).length;
+    const minutes = Math.ceil(wordCount / wordsPerMinute);
+    return `${minutes} min read`;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-      <div className="bg-white/80 backdrop-blur-sm sticky top-0 z-40 border-b border-purple-100">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate("/")}
-                className="flex items-center gap-2 mb-4 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md transition"
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
               >
-                <ArrowLeft size={18} />
-                Go to Home
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">Home</span>
               </button>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Blog Stories
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Discover amazing stories and insights
-              </p>
+              <div className="h-6 w-px bg-gray-300" />
+              <h1 className="text-xl font-bold text-gray-900">Blog</h1>
             </div>
 
-            <div className="relative flex items-center">
+            <div className="flex-1 max-w-md mx-8">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
-                  className="w-full pl-12 pr-4 py-3 rounded-full shadow-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
-                  placeholder="Search blogs by title, content, or author..."
+                  type="text"
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                  placeholder="Search articles..."
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
-
                 {searchQuery && (
                   <button
                     onClick={clearSearch}
@@ -180,412 +211,279 @@ const Blog = () => {
             </div>
 
             <button
-              onClick={() => setFormOpen(!formOpen)}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/25 flex items-center gap-2"
+              onClick={() => setFormOpen(true)}
+              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition-colors font-medium"
             >
-              <span
-                className={`transition-transform duration-300 ${formOpen ? "rotate-45" : ""}`}
-              >
-                +
-              </span>
-              {formOpen ? "Close" : "New Story"}
+              <Plus className="w-4 h-4" />
+              <span>Write</span>
             </button>
           </div>
-
-          {searchQuery && (
-            <div className="mt-4 text-sm text-gray-600">
-              {filteredBlogs.length === 0 ? (
-                <span className="text-red-500">
-                  No blogs found for "{searchQuery}"
-                </span>
-              ) : (
-                <span>
-                  Found {filteredBlogs.length} blog
-                  {filteredBlogs.length !== 1 ? "s" : ""} for "{searchQuery}"
-                </span>
-              )}
-            </div>
-          )}
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {searchQuery && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="text-sm text-gray-600">
+            {filteredBlogs.length === 0 ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-red-600">No results found for</span>
+                <span className="font-medium">"{searchQuery}"</span>
+                <button
+                  onClick={clearSearch}
+                  className="text-blue-600 hover:underline ml-2"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <span>{filteredBlogs.length} article{filteredBlogs.length !== 1 ? "s" : ""} found for</span>
+                <span className="font-medium">"{searchQuery}"</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {message && (
-          <div
-            className={`fixed top-24 right-4 z-50 p-4 rounded-xl shadow-lg animate-slideIn ${
-              message.includes("✅")
-                ? "bg-green-50 border border-green-200 text-green-800"
-                : "bg-red-50 border border-red-200 text-red-800"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span>{message}</span>
-              <button
-                onClick={() => setMessage("")}
-                className="ml-2 hover:opacity-70"
-              >
-                ×
-              </button>
+          <div className="fixed top-20 right-4 z-50 max-w-sm">
+            <div
+              className={`p-4 rounded-lg shadow-lg border ${
+                message.includes("✅")
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : "bg-red-50 border-red-200 text-red-800"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{message}</span>
+                <button
+                  onClick={() => setMessage("")}
+                  className="ml-2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {formOpen && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl transform transition-all duration-300 animate-slideUp relative overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
-
-              <button
-                onClick={() => setFormOpen(false)}
-                className="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors duration-200 z-10"
-              >
-                <svg
-                  className="w-4 h-4 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
+                <h2 className="text-lg font-semibold text-gray-900">Write a new article</h2>
+                <button
+                  onClick={() => setFormOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                    Create New Story
-                  </h2>
-                  <p className="text-gray-600">
-                    Share your thoughts with the world
-                  </p>
+              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                {/* Title Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Write a compelling title..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
                 </div>
 
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Story Title
-                    </label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Enter an engaging title..."
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 placeholder-gray-400 bg-gray-50 focus:bg-white text-lg"
-                      required
-                    />
-                  </div>
+                {/* Content Textarea */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Content
+                  </label>
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Share your thoughts..."
+                    rows={8}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    required
+                  />
+                </div>
 
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Content
-                    </label>
-                    <textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="Write your story here..."
-                      rows={4}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 placeholder-gray-400 bg-gray-50 focus:bg-white resize-none"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-700">
-                      Featured Image
-                    </label>
-                    <div
-                      className={`relative border-2 border-dashed rounded-xl p-6 transition-colors duration-200 ${
-                        dragActive
-                          ? "border-purple-500 bg-purple-50"
-                          : image
-                            ? "border-green-400 bg-green-50"
-                            : "border-gray-300 bg-gray-50 hover:border-purple-400 hover:bg-purple-50"
-                      }`}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                    >
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setImage(e.target.files[0])}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                      <div className="text-center">
-                        {image ? (
-                          <div className="space-y-2">
-                            <svg
-                              className="mx-auto h-12 w-12 text-green-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                              />
-                            </svg>
-                            <p className="text-green-600 font-medium">
-                              {image.name}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <svg
-                              className="mx-auto h-12 w-12 text-gray-400"
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 48 48"
-                            >
-                              <path
-                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            <p className="text-gray-600">
-                              <span className="font-medium text-purple-600">
-                                Click to upload
-                              </span>{" "}
-                              or drag and drop
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleSubmit}
-                    disabled={isLoading || !title.trim() || !content.trim()}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:cursor-not-allowed transform hover:scale-[1.02] disabled:transform-none shadow-lg hover:shadow-purple-500/25"
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Featured Image (Optional)
+                  </label>
+                  <div
+                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      dragActive
+                        ? "border-blue-500 bg-blue-50"
+                        : image
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-300 hover:border-gray-400"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
                   >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImage(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                    {image ? (
+                      <div className="space-y-2">
+                        <div className="text-green-600">
+                          <svg className="mx-auto h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <p className="text-sm font-medium text-green-600">{image.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => setImage(null)}
+                          className="text-xs text-red-600 hover:text-red-800 underline"
                         >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                        Publishing...
+                          Remove image
+                        </button>
                       </div>
                     ) : (
-                      "Publish Story"
+                      <label htmlFor="file-upload" className="cursor-pointer block">
+                        <div className="space-y-2">
+                          <div className="text-gray-400">
+                            <svg className="mx-auto h-8 w-8" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            PNG, JPG, GIF up to 10MB
+                          </div>
+                        </div>
+                      </label>
                     )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => setFormOpen(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading || !title.trim() || !content.trim()}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+                  >
+                    {isLoading && (
+                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    <span>{isLoading ? "Publishing..." : "Publish"}</span>
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         )}
 
-        <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6">
+        <div className="space-y-8">
           {filteredBlogs.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-20">
-              <div className="w-24 h-24 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-4">
-                <svg
-                  className="w-12 h-12 text-purple-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H14"
-                  />
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H14" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                {searchQuery ? "No matching stories found" : "No stories yet"}
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchQuery ? "No articles found" : "No articles yet"}
               </h3>
-              <p className="text-gray-500 text-center max-w-md">
+              <p className="text-gray-500 mb-6">
                 {searchQuery
-                  ? `Try adjusting your search terms or clear the search to see all stories.`
-                  : `Start sharing your thoughts and experiences with the world. Click "New Story" to get started!`}
+                  ? "Try adjusting your search terms"
+                  : "Be the first to share your thoughts"}
               </p>
-              {searchQuery && (
+              {!searchQuery && (
                 <button
-                  onClick={clearSearch}
-                  className="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  onClick={() => setFormOpen(true)}
+                  className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                 >
-                  Clear Search
+                  <Plus className="w-4 h-4" />
+                  <span>Write your first article</span>
                 </button>
               )}
             </div>
           ) : (
-            filteredBlogs.map((blog, idx) => (
-              <div
-                key={idx}
-                className=" group relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-[1.02] mb-6 break-inside-avoid"
-              >
-                <div className="relative overflow-hidden">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {filteredBlogs.map((blog) => (
+                <article
+                  key={blog._id}
+                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden group"
+                >
                   {blog.image && (
-                    <img
-                      src={`http://localhost:3001/uploads/${blog.image}`}
-                      alt={blog.title}
-                      className="w-full h-32 sm:h-40 object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <h2 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-300">
-                      {blog.title}
-                    </h2>
-                    <div className="ml-2 flex-shrink-0">
-                      <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={`http://localhost:3001/uploads/${blog.image}`}
+                        alt={blog.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </div>
-
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-4 mb-4">
-                    {blog.content}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <time className="text-xs text-gray-500 font-medium">
-                      {new Date(blog.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </time>
-                    <p className="text-sm text-gray-600">
-                      Created by{" "}
-                      {blog.author?.firstName ||
-                        blog.author?.email ||
-                        "unknown"}{" "}
-                      {blog.author?.lastName}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-2.5 h-2.5 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                  )}
+                  
+                  <div className="p-6">
+                    <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
+                      <div className="flex items-center space-x-1">
+                        <User className="w-3 h-3" />
+                        <span>{getAuthorName(blog.author)}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(blog.createdAt)}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Eye className="w-3 h-3" />
+                        <span>{getReadingTime(blog.content)}</span>
                       </div>
                     </div>
+                    
+                    <h2 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      <Link to={`/blog/${blog._id}`}>{blog.title}</Link>
+                    </h2>
+                    
+                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+                      {blog.content}
+                    </p>
+                    
+                    <Link
+                      to={`/blog/${blog._id}`}
+                      className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      Read more
+                      <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
                   </div>
-                </div>
-
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-600/90 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-4">
-                  <button className="bg-white text-purple-600 px-4 py-2 rounded-full font-semibold text-sm transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <Link to={`/blog/${blog._id}`}>Read More</Link>
-                  </button>
-                </div>
-              </div>
-            ))
+                </article>
+              ))}
+            </div>
           )}
         </div>
-      </div>
+      </main>
 
-      <div className="fixed top-10 left-10 w-20 h-20 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob pointer-events-none"></div>
-      <div className="fixed top-16 right-10 w-20 h-20 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 pointer-events-none"></div>
-      <div className="fixed bottom-20 left-20 w-20 h-20 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 pointer-events-none"></div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        @keyframes blob {
-          0% {
-            transform: translate(0px, 0px) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-          100% {
-            transform: translate(0px, 0px) scale(1);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        .animate-slideUp {
-          animation: slideUp 0.4s ease-out;
-        }
-        .animate-slideIn {
-          animation: slideIn 0.3s ease-out;
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-        .line-clamp-4 {
-          display: -webkit-box;
-          -webkit-line-clamp: 4;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };
