@@ -12,6 +12,11 @@ const Login = () => {
   const { setToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const API_URL =
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+    "https://blog-backend-ae8e.onrender.com/";
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError("");
@@ -22,7 +27,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3001/api/auth/login", {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -204,8 +209,6 @@ const Login = () => {
         <div className="absolute top-16 right-10 w-20 h-20 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-20 h-20 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
-
-     
     </div>
   );
 };

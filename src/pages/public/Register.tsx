@@ -15,9 +15,14 @@ const Register = () => {
     email: "",
     password: "",
   });
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const API_URL =
+    import.meta.env?.VITE_API_URL ||
+    (typeof process !== "undefined" ? process.env?.REACT_APP_API_URL : null) ||
+    "https://blog-backend-ae8e.onrender.com/";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,7 +35,7 @@ const Register = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3001/api/auth/register", {
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -51,8 +56,6 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center p-4">
