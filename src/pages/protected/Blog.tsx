@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, X, Plus, Calendar, User, Eye } from "lucide-react";
+import { ArrowLeft, Search, X, Plus, Calendar, User, Eye, Menu } from "lucide-react";
 
 interface Author {
   firstName?: string;
@@ -28,12 +28,12 @@ const Blog: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchOpen, setSearchOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL;
  
-
   const filterBlogs = (query: string): void => {
     if (!query.trim()) {
       setFilteredBlogs(blogs);
@@ -63,6 +63,7 @@ const Blog: React.FC = () => {
   const clearSearch = (): void => {
     setSearchQuery("");
     setFilteredBlogs(blogs);
+    setSearchOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
@@ -177,27 +178,31 @@ const Blog: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main header row */}
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+            {/* Left section - Back button and title */}
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
               <button
                 onClick={() => navigate("/")}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span className="text-sm font-medium">Home</span>
+                <span className="text-sm font-medium hidden xs:inline">Home</span>
               </button>
-              <div className="h-6 w-px bg-gray-300" />
-              <h1 className="text-xl font-bold text-gray-900">Blog</h1>
+              <div className="h-6 w-px bg-gray-300 hidden xs:block" />
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Blog</h1>
             </div>
 
-            <div className="flex-1 max-w-md mx-8">
-              <div className="relative">
+            {/* Center section - Search (desktop) */}
+            <div className="hidden md:flex flex-1 max-w-md mx-4 lg:mx-8">
+              <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors"
+                  className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors text-sm"
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={handleSearchChange}
@@ -213,45 +218,93 @@ const Blog: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setFormOpen(true)}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition-colors font-medium"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Write</span>
-            </button>
+            {/* Right section - Search button (mobile) and Write button */}
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+              {/* Mobile search toggle */}
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              {/* Write button */}
+              <button
+                onClick={() => setFormOpen(true)}
+                className="flex items-center space-x-1 sm:space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-full transition-colors font-medium text-sm"
+              >
+                <Plus className="w-4 h-4 flex-shrink-0" />
+                <span className="hidden xs:inline">Write</span>
+              </button>
+            </div>
           </div>
+
+          {/* Mobile search row */}
+          {searchOpen && (
+            <div className="md:hidden pb-4 border-t border-gray-100">
+              <div className="pt-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-colors text-sm"
+                    placeholder="Search articles..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    autoFocus
+                  />
+                  {searchQuery ? (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setSearchOpen(false)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
+      {/* Search results info */}
       {searchQuery && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="text-sm text-gray-600">
             {filteredBlogs.length === 0 ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col xs:flex-row xs:items-center space-y-2 xs:space-y-0 xs:space-x-2">
                 <span className="text-red-600">No results found for</span>
-                <span className="font-medium">"{searchQuery}"</span>
+                <span className="font-medium break-all">"{searchQuery}"</span>
                 <button
                   onClick={clearSearch}
-                  className="text-blue-600 hover:underline ml-2"
+                  className="text-blue-600 hover:underline self-start xs:ml-2"
                 >
                   Clear search
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col xs:flex-row xs:items-center space-y-1 xs:space-y-0 xs:space-x-2">
                 <span>
                   {filteredBlogs.length} article
                   {filteredBlogs.length !== 1 ? "s" : ""} found for
                 </span>
-                <span className="font-medium">"{searchQuery}"</span>
+                <span className="font-medium break-all">"{searchQuery}"</span>
               </div>
             )}
           </div>
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Message notification */}
         {message && (
           <div className="fixed top-20 right-4 z-50 max-w-sm">
             <div
@@ -262,10 +315,10 @@ const Blog: React.FC = () => {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{message}</span>
+                <span className="text-sm font-medium pr-2">{message}</span>
                 <button
                   onClick={() => setMessage("")}
-                  className="ml-2 text-gray-400 hover:text-gray-600"
+                  className="flex-shrink-0 text-gray-400 hover:text-gray-600"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -274,10 +327,11 @@ const Blog: React.FC = () => {
           </div>
         )}
 
+        {/* Create blog modal */}
         {formOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between rounded-t-xl">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Write a new article
                 </h2>
@@ -289,7 +343,7 @@ const Blog: React.FC = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
                 {/* Title Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -300,7 +354,7 @@ const Blog: React.FC = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Write a compelling title..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     required
                   />
                 </div>
@@ -315,7 +369,7 @@ const Blog: React.FC = () => {
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Share your thoughts..."
                     rows={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
                     required
                   />
                 </div>
@@ -326,7 +380,7 @@ const Blog: React.FC = () => {
                     Featured Image (Optional)
                   </label>
                   <div
-                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    className={`relative border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-colors ${
                       dragActive
                         ? "border-blue-500 bg-blue-50"
                         : image
@@ -360,7 +414,7 @@ const Blog: React.FC = () => {
                             />
                           </svg>
                         </div>
-                        <p className="text-sm font-medium text-green-600">
+                        <p className="text-sm font-medium text-green-600 break-all">
                           {image.name}
                         </p>
                         <button
@@ -396,7 +450,7 @@ const Blog: React.FC = () => {
                             <span className="font-medium text-blue-600">
                               Click to upload
                             </span>{" "}
-                            or drag and drop
+                            <span className="hidden xs:inline">or drag and drop</span>
                           </div>
                           <div className="text-xs text-gray-500">
                             PNG, JPG, GIF up to 10MB
@@ -407,18 +461,18 @@ const Blog: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end space-y-3 space-y-reverse sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => setFormOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading || !title.trim() || !content.trim()}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
                     {isLoading && (
                       <svg
@@ -450,9 +504,10 @@ const Blog: React.FC = () => {
           </div>
         )}
 
-        <div className="space-y-8">
+        {/* Blog content */}
+        <div className="space-y-6 sm:space-y-8">
           {filteredBlogs.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-8 sm:py-12">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
                   className="w-8 h-8 text-gray-400"
@@ -471,7 +526,7 @@ const Blog: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {searchQuery ? "No articles found" : "No articles yet"}
               </h3>
-              <p className="text-gray-500 mb-6">
+              <p className="text-gray-500 mb-6 px-4">
                 {searchQuery
                   ? "Try adjusting your search terms"
                   : "Be the first to share your thoughts"}
@@ -487,7 +542,7 @@ const Blog: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredBlogs.map((blog) => (
                 <article
                   key={blog._id}
@@ -503,19 +558,19 @@ const Blog: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="p-6">
-                    <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mb-3">
                       <div className="flex items-center space-x-1">
-                        <User className="w-3 h-3" />
-                        <span>{getAuthorName(blog.author)}</span>
+                        <User className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{getAuthorName(blog.author)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Calendar className="w-3 h-3" />
-                        <span>{formatDate(blog.createdAt)}</span>
+                        <Calendar className="w-3 h-3 flex-shrink-0" />
+                        <span className="whitespace-nowrap">{formatDate(blog.createdAt)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Eye className="w-3 h-3" />
-                        <span>{getReadingTime(blog.content)}</span>
+                        <Eye className="w-3 h-3 flex-shrink-0" />
+                        <span className="whitespace-nowrap">{getReadingTime(blog.content)}</span>
                       </div>
                     </div>
 
