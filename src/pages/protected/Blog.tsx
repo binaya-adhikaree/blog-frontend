@@ -33,7 +33,7 @@ const Blog: React.FC = () => {
   const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL;
- 
+
   const filterBlogs = (query: string): void => {
     if (!query.trim()) {
       setFilteredBlogs(blogs);
@@ -101,11 +101,11 @@ const Blog: React.FC = () => {
         fetchBlogs();
         setTimeout(() => setMessage(""), 3000);
       } else {
-        setMessage(data.message || "❌ Failed to publish article");
+        setMessage(data.message || " Failed to publish article");
       }
     } catch (error) {
       console.error(error);
-      setMessage("❌ Something went wrong");
+      setMessage(" Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -178,25 +178,25 @@ const Blog: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Main header row */}
           <div className="flex items-center justify-between h-16">
-            {/* Left section - Back button and title */}
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
               <button
                 onClick={() => navigate("/")}
                 className="flex items-center space-x-1 sm:space-x-2 text-gray-600 hover:text-gray-900 transition-colors flex-shrink-0"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span className="text-sm font-medium hidden xs:inline">Home</span>
+                <span className="text-sm font-medium hidden xs:inline">
+                  Home
+                </span>
               </button>
               <div className="h-6 w-px bg-gray-300 hidden xs:block" />
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Blog</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
+                Blog
+              </h1>
             </div>
 
-            {/* Center section - Search (desktop) */}
             <div className="hidden md:flex flex-1 max-w-md mx-4 lg:mx-8">
               <div className="relative w-full">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -218,9 +218,7 @@ const Blog: React.FC = () => {
               </div>
             </div>
 
-            {/* Right section - Search button (mobile) and Write button */}
             <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-              {/* Mobile search toggle */}
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
@@ -228,7 +226,6 @@ const Blog: React.FC = () => {
                 <Search className="w-5 h-5" />
               </button>
 
-              {/* Write button */}
               <button
                 onClick={() => setFormOpen(true)}
                 className="flex items-center space-x-1 sm:space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-full transition-colors font-medium text-sm"
@@ -239,7 +236,6 @@ const Blog: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile search row */}
           {searchOpen && (
             <div className="md:hidden pb-4 border-t border-gray-100">
               <div className="pt-4">
@@ -275,7 +271,6 @@ const Blog: React.FC = () => {
         </div>
       </header>
 
-      {/* Search results info */}
       {searchQuery && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="text-sm text-gray-600">
@@ -304,7 +299,6 @@ const Blog: React.FC = () => {
       )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Message notification */}
         {message && (
           <div className="fixed top-20 right-4 z-50 max-w-sm">
             <div
@@ -327,7 +321,6 @@ const Blog: React.FC = () => {
           </div>
         )}
 
-        {/* Create blog modal */}
         {formOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -344,7 +337,6 @@ const Blog: React.FC = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
-                {/* Title Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Title
@@ -359,7 +351,6 @@ const Blog: React.FC = () => {
                   />
                 </div>
 
-                {/* Content Textarea */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Content
@@ -374,7 +365,6 @@ const Blog: React.FC = () => {
                   />
                 </div>
 
-                {/* Image Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Featured Image (Optional)
@@ -450,7 +440,9 @@ const Blog: React.FC = () => {
                             <span className="font-medium text-blue-600">
                               Click to upload
                             </span>{" "}
-                            <span className="hidden xs:inline">or drag and drop</span>
+                            <span className="hidden xs:inline">
+                              or drag and drop
+                            </span>
                           </div>
                           <div className="text-xs text-gray-500">
                             PNG, JPG, GIF up to 10MB
@@ -504,7 +496,6 @@ const Blog: React.FC = () => {
           </div>
         )}
 
-        {/* Blog content */}
         <div className="space-y-6 sm:space-y-8">
           {filteredBlogs.length === 0 ? (
             <div className="text-center py-8 sm:py-12">
@@ -548,10 +539,10 @@ const Blog: React.FC = () => {
                   key={blog._id}
                   className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden group"
                 >
-                  {blog.image && (
+                  {blog?.image && (
                     <div className="aspect-video overflow-hidden">
                       <img
-                        src={`${API_URL}/uploads/${blog.image}`}
+                        src={blog.image}
                         alt={blog.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -562,15 +553,21 @@ const Blog: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mb-3">
                       <div className="flex items-center space-x-1">
                         <User className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate">{getAuthorName(blog.author)}</span>
+                        <span className="truncate">
+                          {getAuthorName(blog.author)}
+                        </span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-3 h-3 flex-shrink-0" />
-                        <span className="whitespace-nowrap">{formatDate(blog.createdAt)}</span>
+                        <span className="whitespace-nowrap">
+                          {formatDate(blog.createdAt)}
+                        </span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Eye className="w-3 h-3 flex-shrink-0" />
-                        <span className="whitespace-nowrap">{getReadingTime(blog.content)}</span>
+                        <span className="whitespace-nowrap">
+                          {getReadingTime(blog.content)}
+                        </span>
                       </div>
                     </div>
 
