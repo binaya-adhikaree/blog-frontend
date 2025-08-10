@@ -335,7 +335,11 @@ const BlogDetails: React.FC = () => {
         <article className="bg-white/90 backdrop-blur-sm shadow-2xl rounded-3xl overflow-hidden">
           {blog?.image && (
             <img
-              src={`${API_URL}/uploads/${blog.image}`}
+               src={
+                blog.image.startsWith("http")
+                  ? blog.image 
+                  : `${API_URL}/uploads/${blog.image}` 
+              }
               alt={blog.title}
               className="w-full h-80 object-cover"
             />

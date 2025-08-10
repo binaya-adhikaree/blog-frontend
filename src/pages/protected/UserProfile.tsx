@@ -423,7 +423,7 @@ const MyProfile: React.FC = () => {
                     {blog.image && (
                       <div className="aspect-video overflow-hidden">
                         <img
-                          src={`${API_URL}/uploads/${blog.image}`}
+                          src={blog.image}
                           alt={blog.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />

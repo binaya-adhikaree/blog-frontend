@@ -328,11 +328,10 @@ const FavouriteBlogs: React.FC = () => {
                 key={blog._id}
                 className="bg-white rounded-xl shadow-sm hover:shadow-md border border-gray-200 overflow-hidden group transition-shadow"
               >
-                {/* Featured Image */}
                 {blog.image && (
                   <div className="aspect-video overflow-hidden relative">
                     <img
-                      src={`${API_URL}/uploads/${blog.image}`}
+                      src={blog.image}
                       alt={blog.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
